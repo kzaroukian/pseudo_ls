@@ -6,6 +6,9 @@
 #include <errno.h>
 #include <string.h>
 
+// Lab 11
+// Kaylin Zaroukian and Marc Chesebro
+
 int main(int argc, char *argv[]) 
 { 
    DIR *dirPtr; 
@@ -14,7 +17,9 @@ int main(int argc, char *argv[])
    struct stat statBuf;
    
    char* dir;
-   if (argc > 2) {
+   if (argc == 4 ) {
+       dir = argv[3];
+   } else if (argc == 3) {
        dir = argv[2];
    } else {
       dir = argv[1];
@@ -25,27 +30,29 @@ int main(int argc, char *argv[])
 	exit(1);
    }
 
-   // TODO: Check if directory or reg file
-   //
-
-   if (argc > 2) {
-      // check for args
-      dirPtr = opendir(argv[2]);
-   } else {
-     dirPtr = opendir (argv[1]);
+   if (!S_ISDIR(statBuf.st_mode)) {
+      printf("Error %s is not a directory \n", dir);
+      exit(1);
    }
-   printf("name\tsize\tinode\tuser\tgroup\n");
+
+   dirPtr = opendir (dir);
+   printf("name\tsize\tgroup\n");
    while ((entryPtr = readdir (dirPtr))){
 
       stat(entryPtr->d_name, &statBuf);
-      printf ("%-20s \t %ldBytes \t %ld \t %u \t %u\n", entryPtr->d_name, statBuf.st_size, statBuf.st_ino, statBuf.st_uid, statBuf.st_gid);
+      printf ("Name: %-20s  Size: \t %ldBytes\n", entryPtr->d_name, statBuf.st_size);
       if (argc > 2) {
-         if(strcmp(argv[1],"-i") == 0) {
-            printf("Inode: %ld\n", statBuf.st_ino);
-	 } 
-	 if (strcmp(argv[1], "-n") == 0) {
-	    printf("User ID: %u\n", statBuf.st_uid);
-	 }	 
+	 int i = 1;
+         while (i < (argc - 1)) {
+
+            if(strcmp(argv[i],"-i") == 0) {
+               printf("Inode: %ld\n", statBuf.st_ino);
+	    } 
+	    if (strcmp(argv[i], "-n") == 0) {
+	       printf("User ID: %u, Group ID: %u\n", statBuf.st_uid, statBuf.st_gid);
+	    }
+	    i++;
+         }	    
       }
 
    }
